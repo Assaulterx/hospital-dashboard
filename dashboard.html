@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- This tag is CRITICAL for responsiveness -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCare Dashboard</title>
+    <!-- Link to Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        /* Import a modern font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        /* --- 1. CSS Variables (Color Palette) --- */
+        :root {
+            --color-primary: #00A79D; /* Teal */
+            --color-primary-dark: #007A72;
+            --color-dark-blue: #1C2541;
+            --color-medium-blue: #2A3B5F;
+            --color-light-gray: #F0F4F8;
+            --color-gray: #A9B4C2;
+            --color-white: #FFFFFF;
+            --color-text: #333;
+            
+            --color-status-confirmed: #E6F7F0;
+            --color-status-confirmed-text: #00875A;
+            --color-status-pending: #FFF8E6;
+            --color-status-pending-text: #FFAB00;
+            --color-status-cancelled: #FFEBE6;
+            --color-status-cancelled-text: #DE350B;
+            --color-modal-overlay: rgba(0, 0, 0, 0.4);
+
+            --color-card-icon-1: #D1E9FF;
+            --color-card-icon-1-text: #0052CC;
+            --color-card-icon-2: #E6F7F0;
+            --color-card-icon-2-text: #00875A;
+            --color-card-icon-3: #FFF8E6;
+            --color-card-icon-3-text: #FFAB00;
+            --color-card-icon-4: #FFEBE6;
+            --color-card-icon-4-text: #DE350B;
+
+            --color-dept-1: #00A79D;
+            --color-dept-2: #0052CC;
+            --color-dept-3: #FFAB00;
+            --color-dept-4: #DE350B;
+            --color-dept-5: #5243AA;
+            --color-dept-6: #FF8B00;
+
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-heavy: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            
+            --sidebar-width: 260px;
+        }
+
+        /* --- 1b. Dark Mode Variables --- */
+        body.dark-mode {
+            --color-primary: #00C4B4;
+            --color-primary-dark: #00A79D;
+            --color-dark-blue: #1a1a1a;
+            --color-medium-blue: #2C2C2C;
+            --color-light-gray: #222;
+            --color-gray: #888;
+            --color-white: #2C2C2C;
+            --color-text: #F0F4F8;
+            --color-modal-overlay: rgba(0, 0, 0, 0.7);
+
+            --color-status-confirmed: #004a2f;
+            --color-status-confirmed-text: #79F2C0;
+            --color-status-pending: #4d3a00;
+            --color-status-pending-text: #FFC400;
+            --color-status-cancelled: #5a1d0b;
+            --color-status-cancelled-text: #FF8F73;
+
+            --color-card-icon-1: #003884;
+            --color-card-icon-1-text: #B3D4FF;
+            --color-card-icon-2: #004a2f;
+            --color-card-icon-2-text: #79F2C0;
+            --color-card-icon-3: #4d3a00;
+            --color-card-icon-3-text: #FFC400;
+            --color-card-icon-4: #5a1d0b;
+            --color-card-icon-4-text: #FF8F73;
+
+            --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.2);
+            --shadow-heavy: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        /* --- 2. Global Resets & Body --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-light-gray);
+            color: var(--color-text);
+            display: flex;
+            /* Prevents horizontal scrollbar caused by sidebar transitions */
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- 3. Sidebar --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--color-dark-blue);
+            color: var(--color-white);
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            z-index: 100;
+            transition: transform 0.3s ease-in-out, background-color 0.3s;
+        }
+        
+        body.dark-mode .sidebar {
+            color: var(--color-text);
+        }
+        body.dark-mode .sidebar__user {
+            background-color: #333; /* Slightly lighter than bg */
+        }
+        body.dark-mode .menu-item {
+            color: var(--color-gray);
+        }
+        body.dark-mode .menu-item:hover {
+            background-color: #333;
+            color: var(--color-text);
+        }
+        body.dark-mode .menu-item.active {
+            background-color: var(--color-primary);
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+        body.dark-mode .sidebar__footer {
+            border-top-color: #444;
+        }
+
+
+        .sidebar__logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .logo-img {
+            width: 36px;
+            height: 36px;
+            fill: var(--color-primary); /* Fills our new SVG logo */
+        }
+        .sidebar__logo h2 {
+            font-weight: 700;
+        }
+
+        .sidebar__user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--color-medium-blue);
+            padding: 12px;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 24px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            fill: var(--color-gray); /* Fills our new SVG avatar */
+            background-color: #556285;
+            padding: 4px;
+        }
+        body.dark-mode .user-avatar {
+            background-color: #555;
+            fill: var(--color-gray);
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .user-date {
+            font-size: 12px;
+            color: var(--color-gray);
+        }
+
+        .sidebar__menu {
+            list-style: none;
+            flex-grow: 1; /* Pushes footer to bottom */
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            border-radius: var(--border-radius-sm);
+            color: var(--color-gray);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        .menu-item i {
+            font-size: 18px;
+            width: 20px; /* Aligns text */
+            text-align: center;
+        }
+        .menu-item:hover {
+            background-color: var(--color-medium-blue);
+            color: var(--color-white);
+        }
+        .menu-item.active {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            font-weight: 600;
+        }
+
+        .sidebar__footer {
+            border-top: 1px solid var(--color-medium-blue);
+            padding-top: 16px;
+        }
+        
+        /* Sidebar toggle for mobile */
+        .sidebar-toggle {
+            display: none; /* Hidden by default */
+            background: none;
+            border: none;
+            color: var(--color-text);
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 101;
+        }
+        
+        /* --- 4. Main Wrapper --- */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+        }
+
+        /* --- 4b. Page Content Hiding --- */
+        .page-content {
+            display: none; /* All pages hidden by default */
+        }
+        .page-content.active {
+            display: block; /* Show only the active page */
+        }
+
+
+        /* --- 5. Header --- */
+        .header {
+            background-color: var(--color-white);
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #E0E0E0;
+            gap: 16px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        body.dark-mode .header {
+            border-bottom-color: #444;
+        }
+        
+        .header__left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header__title h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .header__search {
+            display: flex;
+            align-items: center;
+            background-color: var(--color-light-gray);
+            padding: 10px 16px;
+            border-radius: var(--border-radius-sm);
+            width: 350px;
+            transition: background-color 0.3s;
+        }
+        .header__search i {
+            color: var(--color-gray);
+            margin-right: 10px;
+        }
+        .header__search input {
+            border: none;
+            outline: none;
+            background: none;
+            font-size: 14px;
+            width: 100%;
+            color: var(--color-text);
+        }
+
+        .header__actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .action-btn {
+            background: none;
+            border: 1px solid #E0E0E0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--color-medium-blue);
+            position: relative;
+            transition: background-color 0.3s ease, border-color 0.3s, color 0.3s;
+        }
+        body.dark-mode .action-btn {
+            border-color: #555;
+            color: var(--color-gray);
+        }
+        .action-btn:hover {
+            background-color: var(--color-light-gray);
+        }
+        body.dark-mode .action-btn:hover {
+            background-color: #333;
+        }
+
+        /* Dark Mode Toggle Icons */
+        .action-btn .fa-sun { display: none; }
+        .action-btn .fa-moon { display: block; }
+        body.dark-mode .action-btn .fa-sun { display: block; }
+        body.dark-mode .action-btn .fa-moon { display: none; }
+
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--color-status-cancelled-text);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+        }
+        .btn {
+            padding: 10px 16px;
+            border-radius: var(--border-radius-sm);
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+        }
+        body.dark-mode .btn-primary {
+            color: #1a1a1a;
+        }
+        .btn-primary:hover {
+            background-color: var(--color-primary-dark);
+        }
+
+        /* --- 6. Main Content --- */
+        .main-content {
+            flex-grow: 1;
+            padding: 32px;
+            /* This creates the subtle gradient from the mockup */
+            background: linear-gradient(180deg, 
+                rgba(230, 247, 240, 0.5) 0%,  /* Light green-tint */
+                rgba(240, 244, 248, 0.5) 30%  /* Light gray */
+            );
+        }
+        body.dark-mode .main-content {
+             background: none; /* No gradient in dark mode */
+        }
+
+        .content-card {
+            background-color: var(--color-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-light);
+            padding: 24px;
+            transition: background-color 0.3s;
+        }
+        
+        .page-header {
+            display: flex;
+            flex-wrap: wrap; /* Allows filters to wrap on small screens */
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .page-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+        .filter-search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .filter-search-wrapper i {
+            position: absolute;
+            left: 12px;
+            color: var(--color-gray);
+            font-size: 14px;
+        }
+        .filter-search {
+            border: 1px solid #E0E0E0;
+            border-radius: var(--border-radius-sm);
+            padding: 8px 12px 8px 35px; /* Makes room for icon */
+            font-size: 14px;
+            background-color: var(--color-white);
+            color: var(--color-text);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        body.dark-mode .filter-search {
+            border-color: #555;
+        }
+
+        .filter-select {
+            border: 1px solid #E0E0E0;
+            border-radius: var(--border-radius-sm);
+            padding: 8px 12px;
+            font-size: 14px;
+            background-color: var(--color-white);
+            color: var(--color-text);
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+        body.dark-mode .filter-select {
+            border-color: #555;
+        }
+
+        /* --- 7. Table Styling (Appointments & Patients) --- */
+        .table-responsive-wrapper {
+            /* This makes the table scroll horizontally on small screens */
+            overflow-x: auto;
+        }
+        
+        .appointments-table {
+            width: 100%;
+            min-width: 800px; /* Ensures table is wide, forcing scroll if needed */
+            border-collapse: collapse; /* Clean lines */
+            text-align: left;
+        }
+        .appointments-table th, 
+        .appointments-table td {
+            padding: 16px 12px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--color-light-gray);
+            white-space: nowrap; /* Prevents text wrapping */
+            transition: border-color 0.3s;
+        }
+        .appointments-table th {
+            font-weight: 600;
+            color: var(--color-gray);
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .appointments-table tbody tr:hover {
+            background-color: var(--color-light-gray);
+        }
+        
+        /* Patient-specific styles */
+        .patient-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .patient-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--color-light-gray);
+            display: grid;
+            place-items: center;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+        .patient-avatar.pa-1 { background-color: var(--color-card-icon-1); color: var(--color-card-icon-1-text); }
+        .patient-avatar.pa-2 { background-color: var(--color-card-icon-2); color: var(--color-card-icon-2-text); }
+        .patient-avatar.pa-3 { background-color: var(--color-card-icon-3); color: var(--color-card-icon-3-text); }
+        .patient-avatar.pa-4 { background-color: var(--color-card-icon-4); color: var(--color-card-icon-4-text); }
+        
+        body.dark-mode .patient-avatar.pa-1 { background-color: var(--color-card-icon-1); color: var(--color-card-icon-1-text); }
+        body.dark-mode .patient-avatar.pa-2 { background-color: var(--color-card-icon-2); color: var(--color-card-icon-2-text); }
+        body.dark-mode .patient-avatar.pa-3 { background-color: var(--color-card-icon-3); color: var(--color-card-icon-3-text); }
+        body.dark-mode .patient-avatar.pa-4 { background-color: var(--color-card-icon-4); color: var(--color-card-icon-4-text); }
+
+        .patient-info .patient-name {
+            font-weight: 600;
+            display: block;
+        }
+        .patient-info .patient-email {
+            font-size: 12px;
+            color: var(--color-gray);
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 16px; /* Pill shape */
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .status-confirmed {
+            background-color: var(--color-status-confirmed);
+            color: var(--color-status-confirmed-text);
+        }
+        .status-pending {
+            background-color: var(--color-status-pending);
+            color: var(--color-status-pending-text);
+        }
+        .status-cancelled {
+            background-color: var(--color-status-cancelled);
+            color: var(--color-status-cancelled-text);
+        }
+        .action-icons i {
+            color: var(--color-gray);
+            margin-right: 16px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .action-icons i:hover {
+            color: var(--color-primary);
+        }
+
+        /* --- 8. "New Appointment" Modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--color-modal-overlay);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            
+            /* Hidden by default */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease, background-color 0.3s;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--color-white);
+            padding: 24px;
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-heavy);
+            width: 90%;
+            max-width: 500px;
+            
+            /* Pop-in animation */
+            transform: scale(0.9);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s;
+        }
+        .modal-overlay.open .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #E0E0E0;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            transition: border-color 0.3s;
+        }
+        body.dark-mode .modal-header {
+            border-bottom-color: #555;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--color-gray);
+        }
+        
+        /* This is the container for all form fields */
+        #modal-form-content {
+             display: grid;
+             grid-template-columns: 1fr 1fr; /* Two columns */
+             gap: 16px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1; /* Spans full width */
+        }
+        
+        .form-group label {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #E0E0E0;
+            border-radius: var(--border-radius-sm);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-white);
+            color: var(--color-text);
+            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+        }
+        
+        body.dark-mode .form-group input,
+        body.dark-mode .form-group select,
+        body.dark-mode .form-group textarea {
+            border-color: #555;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #E0E0E0;
+            transition: border-color 0.3s;
+        }
+         body.dark-mode .modal-footer {
+            border-top-color: #555;
+        }
+        
+        .btn-secondary {
+            background-color: var(--color-light-gray);
+            color: var(--color-text);
+        }
+        .btn-secondary:hover {
+            background-color: #e0e4e8;
+        }
+        body.dark-mode .btn-secondary:hover {
+            background-color: #444;
+        }
+
+
+        /* --- 9. Dashboard Page Styles --- */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+        }
+        .stat-card {
+            background-color: var(--color-white);
+            padding: 24px;
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-light);
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            transition: background-color 0.3s;
+        }
+        .stat-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+        }
+        .stat-card-icon.icon-1 { background-color: var(--color-card-icon-1); color: var(--color-card-icon-1-text); }
+        .stat-card-icon.icon-2 { background-color: var(--color-card-icon-2); color: var(--color-card-icon-2-text); }
+        .stat-card-icon.icon-3 { background-color: var(--color-card-icon-3); color: var(--color-card-icon-3-text); }
+        .stat-card-icon.icon-4 { background-color: var(--color-card-icon-4); color: var(--color-card-icon-4-text); }
+
+        .stat-card-info h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .stat-card-info p {
+            font-size: 14px;
+            color: var(--color-gray);
+        }
+
+        .dashboard-grid-col-2 {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+        .chart-container {
+            height: 300px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding: 24px;
+            border-radius: var(--border-radius-md);
+        }
+        .chart-bar {
+            width: 20px;
+            background-color: var(--color-primary);
+            border-radius: 4px 4px 0 0;
+            animation: rise 1s ease-out;
+        }
+        @keyframes rise {
+            from { height: 0; }
+        }
+        .quick-actions .btn {
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        /* --- 10. Doctors & Depts Card Grid Styles --- */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+        
+        .doctor-card {
+            background: var(--color-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-light);
+            text-align: center;
+            padding: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s, background-color 0.3s;
+        }
+        .doctor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-heavy);
+        }
+        .doctor-avatar-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 16px;
+        }
+        .doctor-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 40px;
+            font-weight: 700;
+        }
+        .online-status {
+            width: 16px;
+            height: 16px;
+            background: var(--color-status-confirmed-text);
+            border: 2px solid var(--color-white);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+        }
+        body.dark-mode .online-status {
+            border-color: var(--color-white); /* Keep border white */
+        }
+
+        .doctor-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .doctor-card .doctor-specialty {
+            font-size: 14px;
+            color: var(--color-primary);
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        body.dark-mode .doctor-card .doctor-specialty {
+            color: var(--color-primary-dark);
+        }
+
+        .doctor-card-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .doctor-card-actions .btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        /* Department Cards */
+        .dept-card {
+            background: var(--color-white);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-light);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+            transition: background-color 0.3s;
+        }
+        .dept-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            color: var(--color-white);
+        }
+        /* Unique Dept Colors */
+        .dept-card.d-1 .dept-icon { background: var(--color-dept-1); }
+        .dept-card.d-2 .dept-icon { background: var(--color-dept-2); }
+        .dept-card.d-3 .dept-icon { background: var(--color-dept-3); }
+        .dept-card.d-4 .dept-icon { background: var(--color-dept-4); }
+        .dept-card.d-5 .dept-icon { background: var(--color-dept-5); }
+        .dept-card.d-6 .dept-icon { background: var(--color-dept-6); }
+        
+        .dept-card.d-1 .dept-title-link { color: var(--color-dept-1); }
+        .dept-card.d-2 .dept-title-link { color: var(--color-dept-2); }
+        .dept-card.d-3 .dept-title-link { color: var(--color-dept-3); }
+        .dept-card.d-4 .dept-title-link { color: var(--color-dept-4); }
+        .dept-card.d-5 .dept-title-link { color: var(--color-dept-5); }
+        .dept-card.d-6 .dept-title-link { color: var(--color-dept-6); }
+
+        .dept-card h4 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .dept-card p {
+            font-size: 14px;
+            color: var(--color-gray);
+            flex-grow: 1; /* Pushes link to bottom */
+        }
+        .dept-title-link {
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .dept-title-link i {
+            margin-left: 4px;
+            transition: margin-left 0.3s ease;
+        }
+        .dept-title-link:hover i {
+            margin-left: 8px;
+        }
+
+        /* --- 11. Schedule/Calendar Page Styles --- */
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .calendar-nav button {
+            background: var(--color-white);
+            border: 1px solid #E0E0E0;
+            border-radius: var(--border-radius-sm);
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+        }
+        body.dark-mode .calendar-nav button {
+            background-color: var(--color-medium-blue);
+            border-color: #555;
+        }
+        .calendar-nav h4 {
+            font-size: 18px;
+            font-weight: 600;
+            width: 150px;
+            text-align: center;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            border-top: 1px solid #E0E0E0;
+            border-left: 1px solid #E0E0E0;
+        }
+        body.dark-mode .calendar-grid {
+            border-color: #555;
+        }
+
+        .calendar-day-header {
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            padding: 12px 8px;
+            background: var(--color-white);
+            border-right: 1px solid #E0E0E0;
+            border-bottom: 1px solid #E0E0E0;
+        }
+        .calendar-day {
+            min-height: 120px;
+            padding: 8px;
+            border-right: 1px solid #E0E0E0;
+            border-bottom: 1px solid #E0E0E0;
+            background: var(--color-white);
+            transition: background-color 0.3s;
+        }
+        body.dark-mode .calendar-day,
+        body.dark-mode .calendar-day-header {
+            border-color: #555;
+        }
+
+        .calendar-day.other-month {
+            background-color: var(--color-light-gray);
+            color: var(--color-gray);
+        }
+        .day-number {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        .calendar-day.today .day-number {
+            color: var(--color-primary);
+            position: relative;
+            display: inline-block;
+        }
+        .calendar-day.today .day-number::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: var(--color-primary);
+            bottom: -2px;
+            left: 0;
+            border-radius: 2px;
+        }
+
+        .calendar-event {
+            font-size: 12px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--color-white);
+        }
+        .event-blue { background: var(--color-dept-2); }
+        .event-green { background: var(--color-dept-1); }
+        .event-orange { background: var(--color-dept-3); }
+
+        /* --- 12. Settings Page Styles --- */
+        .settings-layout {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 24px;
+        }
+        .settings-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .settings-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--color-gray);
+        }
+        .settings-nav-item i {
+            width: 18px;
+            text-align: center;
+        }
+        .settings-nav-item:hover {
+            background: var(--color-light-gray);
+            color: var(--color-text);
+        }
+        .settings-nav-item.active {
+            background: var(--color-primary);
+            color: var(--color-white);
+        }
+        body.dark-mode .settings-nav-item.active {
+            color: #1a1a1a;
+        }
+        
+        .settings-content {
+            display: none; /* Hidden by default */
+        }
+        .settings-content.active {
+            display: block; /* Show active one */
+        }
+        .settings-content .form-group input,
+        .settings-content .form-group textarea {
+            background-color: var(--color-light-gray);
+        }
+        .settings-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #E0E0E0;
+        }
+        body.dark-mode .settings-footer {
+            border-color: #555;
+        }
+
+
+        /* --- 13. Responsive Media Queries --- */
+
+        /* Tablet & Small Desktop */
+        @media (max-width: 1024px) {
+            .sidebar {
+                /* Hide sidebar off-screen */
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                /* Bring sidebar on-screen */
+                transform: translateX(0);
+                box-shadow: var(--shadow-heavy);
+            }
+            .main-wrapper {
+                /* Main content takes full width */
+                margin-left: 0;
+                width: 100%;
+            }
+            .sidebar-toggle {
+                /* Show the hamburger menu button */
+                display: block;
+            }
+            .header__search {
+                /* Hide search on smaller screens to save space */
+                display: none;
+            }
+            .dashboard-grid-col-2 {
+                grid-template-columns: 1fr; /* Stack chart and actions */
+            }
+        }
+
+        /* Mobile Phone */
+        @media (max-width: 640px) {
+            .header {
+                padding: 16px;
+            }
+            .header__title h1 {
+                font-size: 20px;
+            }
+            .header__actions {
+                gap: 8px;
+            }
+            /* Hide the text on the main button, show only icon */
+            .btn-primary span {
+                display: none;
+            }
+            .btn-primary {
+                padding: 10px;
+                width: 40px; /* Make it square */
+                justify-content: center;
+            }
+            .action-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+            .main-content {
+                padding: 16px;
+            }
+            .content-card {
+                padding: 16px;
+            }
+            .filters {
+                /* Stack filters vertically */
+                flex-direction: column;
+                align-items: stretch;
+                width: 100%;
+            }
+            .filter-search, .filter-select {
+                width: 100%;
+            }
+            /* Make modal form 1-column */
+            #modal-form-content {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr; /* Stack stat cards */
+            }
+
+            .settings-layout {
+                grid-template-columns: 1fr; /* Stack settings nav and content */
+            }
+            .settings-nav {
+                flex-direction: row;
+                overflow-x: auto; /* Allow horizontal scroll for nav */
+            }
+            
+            /* Calendar mobile */
+            .calendar-controls {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .calendar-day-header {
+                font-size: 10px;
+                padding: 8px 4px;
+            }
+            .calendar-day {
+                min-height: 80px;
+            }
+            .calendar-event {
+                font-size: 10px;
+                padding: 2px 4px;
+            }
+            .day-number {
+                font-size: 12px;
+            }
+        }
+        
+        /* --- 14. NEW: Loading Overlay --- */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        body.dark-mode .loading-overlay {
+             background: rgba(0, 0, 0, 0.7);
+        }
+        .loading-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--color-medium-blue);
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar__logo">
+            <svg class="logo-img" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H8l4-5v4h3l-4 5z" fill="currentFill"/>
+            </svg>
+            <h2>MediCare</h2>
+        </div>
+        
+        <div class="sidebar__user">
+            <svg class="user-avatar" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="currentFill"/>
+            </svg>
+            <div class="user-details">
+                <span class="user-name">Reception Desk</span>
+                <span class="user-date" id="current-datetime"></span>
+            </div>
+        </div>
+
+        <ul class="sidebar__menu">
+            <!--
+                data-page attribute links to the ID of the page-content div
+            -->
+            <li>
+                <a href="#" class="menu-item active" data-page="page-dashboard">
+                    <i class="fa-solid fa-table-columns"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-item" data-page="page-appointments">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Appointments</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-item" data-page="page-patients">
+                    <i class="fa-solid fa-user-group"></i>
+                    <span>Patients</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-item" data-page="page-doctors">
+                    <i class="fa-solid fa-user-doctor"></i>
+                    <span>Doctors</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-item" data-page="page-departments">
+                    <i class="fa-solid fa-building"></i>
+                    <span>Departments</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" class="menu-item" data-page="page-schedule">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Schedule</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="sidebar__footer">
+            <a href="#" class="menu-item" data-page="page-settings">
+                <i class="fa-solid fa-gear"></i>
+                <span>Settings</span>
+            </a>
+            <a href="./login.html" class="menu-item" id="logout-btn">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- 2. Main Content Area -->
+    <div class="main-wrapper" id="main-wrapper">
+        
+        <!-- 2a. Header -->
+        <header class="header">
+            <div class="header__left">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="header__title">
+                    <h1 id="page-title-header">Dashboard</h1>
+                </div>
+            </div>
+            
+            <div class="header__search">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" placeholder="Search patients, doctors...">
+            </div>
+            <div class="header__actions">
+                <button class="action-btn" id="theme-toggle">
+                    <i class="fa-solid fa-moon"></i>
+                    <i class="fa-solid fa-sun"></i>
+                </button>
+                <button class="action-btn">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <!-- This button's text/action will be set by JS -->
+                <button class="btn btn-primary" id="main-add-btn">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>New Appointment</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- 2b. Main Content -->
+        <main class="main-content">
+
+            <!-- 
+              =================================
+              Page 1: DASHBOARD
+              =================================
+            -->
+            <div class="page-content active" id="page-dashboard">
+                <!-- Stat Cards Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-icon icon-1">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-card-info">
+                            <h3 id="stat-appointments">0</h3>
+                            <p>Appointments Today</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon icon-2">
+                            <i class="fa-solid fa-user-group"></i>
+                        </div>
+                        <div class="stat-card-info">
+                            <h3 id="stat-patients">0</h3>
+                            <p>Total Patients</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon icon-3">
+                            <i class="fa-solid fa-user-doctor"></i>
+                        </div>
+                        <div class="stat-card-info">
+                            <h3 id="stat-doctors">0</h3>
+                            <p>Doctors Available</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-icon icon-4">
+                            <i class="fa-solid fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-card-info">
+                            <h3>$12,450</h3>
+                            <p>Today's Earnings</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard 2-Column Grid -->
+                <div class="dashboard-grid-col-2">
+                    <div class="content-card">
+                        <div class="page-header">
+                            <h3>Weekly Appointments</h3>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-bar" style="height: 60%;"></div>
+                            <div class="chart-bar" style="height: 80%;"></div>
+                            <div class="chart-bar" style="height: 50%;"></div>
+                            <div class="chart-bar" style="height: 70%;"></div>
+                            <div class="chart-bar" style="height: 90%;"></div>
+                            <div class="chart-bar" style="height: 75%;"></div>
+                            <div class="chart-bar" style="height: 65%;"></div>
+                        </div>
+                    </div>
+                    <div class="content-card quick-actions">
+                        <div class="page-header">
+                            <h3>Quick Actions</h3>
+                        </div>
+                        <button class="btn btn-primary" data-modal-type="appointment">
+                            <i class="fa-solid fa-plus"></i> New Appointment
+                        </button>
+                        <button class="btn btn-secondary" data-modal-type="patient">
+                            <i class="fa-solid fa-user-plus"></i> Add New Patient
+                        </button>
+                        <button class="btn btn-secondary" data-modal-type="doctor">
+                            <i class="fa-solid fa-user-doctor"></i> Add New Doctor
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 
+              =================================
+              Page 2: APPOINTMENTS
+              =================================
+            -->
+            <div class="page-content" id="page-appointments">
+                <div class="content-card">
+                    <div class="page-header">
+                        <h3>Appointments Management</h3>
+                        <div class="filters">
+                            <div class="filter-search-wrapper">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" placeholder="Search appointments..." class="filter-search">
+                            </div>
+                            <select name="status" class="filter-select">
+                                <option value="all">All Status</option>
+                                <option value="confirmed">Confirmed</option>
+                                <option value="pending">Pending</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive-wrapper">
+                        <table class="appointments-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox"></th>
+                                    <th>APPT ID</th>
+                                    <th>Patient Name</th>
+                                    <th>Doctor Name</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Treatment</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointments-table-body">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 
+              =================================
+              Page 3: PATIENTS
+              =================================
+            -->
+            <div class="page-content" id="page-patients">
+                <div class="content-card">
+                    <div class="page-header">
+                        <h3>Patients Management</h3>
+                        <div class="filters">
+                             <div class="filter-search-wrapper">
+                                <i class="fa-solid fa-search"></i>
+                                <input type="text" placeholder="Search patients..." class="filter-search">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive-wrapper">
+                        <table class="appointments-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox"></th>
+                                    <th>Patient Name</th>
+                                    <th>Patient ID</th>
+                                    <th>Last Visit</th>
+                                    <th>Total Appointments</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patients-table-body">
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 
+              =================================
+              Page 4: DOCTORS
+              =================================
+            -->
+            <div class="page-content" id="page-doctors">
+                <div class="page-header">
+                    <h3>Doctors Management</h3>
+                    <div class="filters">
+                         <div class="filter-search-wrapper">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" placeholder="Search doctors..." class="filter-search">
+                        </div>
+                        <select name="doc-specialty" class="filter-select">
+                            <option value="all">All Specialties</option>
+                            <option value="Cardiology">Cardiology</option>
+                            <option value="Dental">Dental</option>
+                            <option value="Neurology">Neurology</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card-grid" id="doctors-card-grid">
+                    <!-- Data will be loaded here -->
+                </div>
+            </div>
+
+            <!-- 
+              =================================
+              Page 5: DEPARTMENTS
+              =================================
+            -->
+            <div class="page-content" id="page-departments">
+                <div class="page-header">
+                    <h3>Departments</h3>
+                    <div class="filters">
+                         <div class="filter-search-wrapper">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" placeholder="Search departments..." class="filter-search">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-grid" id="departments-card-grid">
+                    <!-- Data will be loaded here -->
+                </div>
+            </div>
+
+            <!-- 
+              =================================
+              Page 6: SCHEDULE
+              =================================
+            -->
+            <div class="page-content" id="page-schedule">
+                <div class="content-card">
+                    <div class="page-header">
+                        <h3>Doctor Schedules</h3>
+                        <div class="filters">
+                            <select name="doc-schedule" class="filter-select" id="schedule-doctor-select">
+                                <option value="all">All Doctors</option>
+                                <!-- Doctor options will be populated by JS -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="calendar-controls">
+                        <div class="calendar-nav">
+                            <button><i class="fa-solid fa-chevron-left"></i></button>
+                            <h4>November 2025</h4>
+                            <button><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="calendar-grid">
+                        <!-- Headers -->
+                        <div class="calendar-day-header">SUN</div>
+                        <div class="calendar-day-header">MON</div>
+                        <div class="calendar-day-header">TUE</div>
+                        <div class="calendar-day-header">WED</div>
+                        <div class="calendar-day-header">THU</div>
+                        <div class="calendar-day-header">FRI</div>
+                        <div class="calendar-day-header">SAT</div>
+                        
+                        <!-- Days (This is static, but appointments could be loaded dynamically) -->
+                        <div class="calendar-day other-month"><div class="day-number">26</div></div>
+                        <div class="calendar-day other-month"><div class="day-number">27</div></div>
+                        <div class="calendar-day other-month"><div class="day-number">28</div></div>
+                        <div class="calendar-day other-month"><div class="day-number">29</div></div>
+                        <div class="calendar-day other-month"><div class="day-number">30</div></div>
+                        <div class="calendar-day other-month"><div class="day-number">31</div></div>
+                        <div class="calendar-day"><div class="day-number">1</div></div>
+                        
+                        <div class="calendar-day today"><div class="day-number">2</div></div>
+                        <div class="calendar-day"><div class="day-number">3</div>
+                            <div class_id="cal-event-1" class="calendar-event event-green">10:00 AM L. Johnson</div>
+                            <div class_id="cal-event-2" class="calendar-event event-blue">11:30 AM O. Smith</div>
+                        </div>
+                        <div class="calendar-day"><div class="day-number">4</div>
+                            <div class_id="cal-event-3" class="calendar-event event-orange">09:15 AM N. Williams</div>
+                        </div>
+                        <div class="calendar-day"><div class="day-number">5</div>
+                             <div class_id="cal-event-4" class="calendar-event event-green">03:30 PM J. Davis</div>
+                        </div>
+                        <div class="calendar-day"><div class="day-number">6</div></div>
+                        <div class="calendar-day"><div class="day-number">7</div></div>
+                        <div class="calendar-day"><div class="day-number">8</div></div>
+                        
+                        <div class="calendar-day"><div class="day-number">9</div></div>
+                        <div class="calendar-day"><div class="day-number">10</div></div>
+                        <div class="calendar-day"><div class="day-number">11</div></div>
+                        <div class="calendar-day"><div class="day-number">12</div></div>
+                        <div class="calendar-day"><div class="day-number">13</div></div>
+                        <div class="calendar-day"><div class="day-number">14</div></div>
+                        <div class="calendar-day"><div class="day-number">15</div></div>
+                        
+                        <div class="calendar-day"><div class="day-number">16</div></div>
+                        <div class="calendar-day"><div class="day-number">17</div></div>
+                        <div class="calendar-day"><div class="day-number">18</div></div>
+                        <div class="calendar-day"><div class="day-number">19</div></div>
+                        <div class="calendar-day"><div class="day-number">20</div></div>
+                        <div class="calendar-day"><div class="day-number">21</div></div>
+                        <div class="calendar-day"><div class="day-number">22</div></div>
+                        
+                        <div class="calendar-day"><div class="day-number">23</div></div>
+                        <div class="calendar-day"><div class="day-number">24</div></div>
+                        <div class="calendar-day"><div class="day-number">25</div></div>
+                        <div class="calendar-day"><div class="day-number">26</div></div>
+                        <div class="calendar-day"><div class="day-number">27</div></div>
+                        <div class="calendar-day"><div class="day-number">28</div></div>
+                        <div class="calendar-day"><div class="day-number">29</div></div>
+                        
+                        <div class="calendar-day"><div class="day-number">30</div></div>
+                        <div class="calendar-day other-month"><div class="day-number">1</div></div>
+                        <div class="calendar-day other-month"><div class="day-number">2</div></div>
+                        <div class="calendar-day other-month"><div class="day-number">3</div></div>
+                        <div class="calendar-day other-month"><div class="day-number">4</div></div>
+                        <div class="calendar-day other-month"><div class="day-number">5</div></div>
+                        <div class="calendar-day other-month"><div class="day-number">6</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 
+              =================================
+              Page 7: SETTINGS
+              =================================
+            -->
+            <div class="page-content" id="page-settings">
+                <div class="settings-layout">
+                    <div class="settings-nav">
+                        <a href="#" class="settings-nav-item active" data-setting="setting-profile">
+                            <i class="fa-solid fa-user"></i> <span>Profile</span>
+                        </a>
+                        <a href="#" class="settings-nav-item" data-setting="setting-security">
+                            <i class="fa-solid fa-lock"></i> <span>Security</span>
+                        </a>
+                        <a href="#" class="settings-nav-item" data-setting="setting-notifications">
+                            <i class="fa-solid fa-bell"></i> <span>Notifications</span>
+                        </a>
+                    </div>
+                    
+                    <div class="content-card">
+                        <!-- Profile Settings -->
+                        <div class="settings-content active" id="setting-profile">
+                            <h4>Profile Settings</h4>
+                            <form action="#" style="margin-top: 24px;">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="setting-name">Full Name</label>
+                                        <input type="text" id="setting-name" value="Reception Desk">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="setting-email">Email</label>
+                                        <input type="email" id="setting-email" value="reception@medicare.com">
+                                    </div>
+                                </div>
+                                <div class="settings-footer">
+                                    <button class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Security Settings -->
+                        <div class="settings-content" id="setting-security">
+                            <h4>Security Settings</h4>
+                            <form action="#" style="margin-top: 24px;">
+                                <div class="form-group">
+                                    <label for="setting-pass">Current Password</label>
+                                    <input type="password" id="setting-pass">
+                                </div>
+                                <div class="form-group">
+                                    <label for="setting-new-pass">New Password</label>
+                                    <input type="password" id="setting-new-pass">
+                                </div>
+                                <div class="form-group">
+                                    <label for="setting-confirm-pass">Confirm New Password</label>
+                                    <input type="password" id="setting-confirm-pass">
+                                </div>
+                                <div class="settings-footer">
+                                    <button class="btn btn-primary">Update Password</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Notifications Settings -->
+                        <div class="settings-content" id="setting-notifications">
+                            <h4>Notification Settings</h4>
+                            <p style="margin-top: 24px;">Notification toggles would go here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    
+    <!-- 
+      =================================
+      Main Modal (Used for everything)
+      =================================
+    -->
+    <div class="modal-overlay" id="main-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">New Appointment</h3>
+                <button class="modal-close" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form action="#">
+                    <!-- JS will insert form fields here -->
+                    <div id="modal-form-content"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-cancel-btn">Cancel</button>
+                <button class="btn btn-primary" id="modal-save-btn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+      =================================
+      Global Loading Spinner
+      =================================
+    -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    
+    <script>
+        // !! IMPORTANT !!
+        // Paste your deployed Google Apps Script URL here
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz21pqGVBYuKb9fAv4Z9e8po0ub8FhyhScUq8iWWxqNFQ34M-4FdIEXyXntcBzBgEf3/exec';
+
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- Global Elements ---
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const pageTitle = document.getElementById('page-title-header');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const mainAddBtn = document.getElementById('main-add-btn');
+
+            // Page content containers
+            const contentPages = document.querySelectorAll('.page-content');
+            
+            // Table/Grid bodies
+            const appointmentsTBody = document.getElementById('appointments-table-body');
+            const patientsTBody = document.getElementById('patients-table-body');
+            const doctorsGrid = document.getElementById('doctors-card-grid');
+            const departmentsGrid = document.getElementById('departments-card-grid');
+            const scheduleDoctorSelect = document.getElementById('schedule-doctor-select');
+            
+            // Stat elements
+            const statAppointments = document.getElementById('stat-appointments');
+            const statPatients = document.getElementById('stat-patients');
+            const statDoctors = document.getElementById('stat-doctors');
+
+            // Modal elements
+            const modal = document.getElementById('main-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalFormContent = document.getElementById('modal-form-content');
+            const modalSaveBtn = document.getElementById('modal-save-btn');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+            const modalCancelBtn = document.getElementById('modal-cancel-btn');
+            
+            // Global state
+            let currentModalType = 'appointment'; // Tracks what the modal is for
+            let allAppointments = []; // Cache for appointment data
+            let allDoctors = []; // Cache for doctor names
+            let allPatients = []; // Cache for patient names
+
+            // --- Loading Functions ---
+            const showLoading = () => loadingOverlay.classList.add('open');
+            const hideLoading = () => loadingOverlay.classList.remove('open');
+
+            // --- 1. Sidebar Page Navigation Logic ---
+            const menuItems = document.querySelectorAll('.sidebar .menu-item');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function(event) {
+                    if (this.id === 'logout-btn') return; // Let logout link work
+                    event.preventDefault();
+                    
+                    const targetPageId = this.dataset.page;
+                    if (!targetPageId) return;
+
+                    const targetPage = document.getElementById(targetPageId);
+                    const targetTitle = this.querySelector('span').textContent;
+
+                    if (targetPage) {
+                        // Update active states
+                        contentPages.forEach(page => page.classList.remove('active'));
+                        menuItems.forEach(i => i.classList.remove('active'));
+                        targetPage.classList.add('active');
+                        this.classList.add('active');
+
+                        // Update header title
+                        if (pageTitle) pageTitle.textContent = targetTitle;
+
+                        // Update main "Add" button
+                        updateMainAddButton(targetPageId);
+                        
+                        // Load data for the clicked page
+                        loadPageData(targetPageId);
+
+                        // Close sidebar on mobile after clicking
+                        if (window.innerWidth <= 1024) {
+                            sidebar.classList.remove('open');
+                        }
+                    }
+                });
+            });
+
+            /**
+             * Updates the main "Add" button in the header based on the active page
+             */
+            function updateMainAddButton(pageId) {
+                if (!mainAddBtn) return;
+                
+                let text = '';
+                let type = '';
+
+                switch (pageId) {
+                    case 'page-appointments':
+                        text = 'New Appointment';
+                        type = 'appointment';
+                        break;
+                    case 'page-patients':
+                        text = 'Add Patient';
+                        type = 'patient';
+                        break;
+                    case 'page-doctors':
+                        text = 'Add Doctor';
+                        type = 'doctor';
+                        break;
+                    case 'page-departments':
+                        text = 'Add Department';
+                        type = 'department';
+                        break;
+                    case 'page-schedule':
+                        text = 'New Appointment';
+                        type = 'appointment';
+                        break;
+                    default:
+                        // Hide button on Dashboard, Settings, etc.
+                        mainAddBtn.style.display = 'none';
+                        return;
+                }
+                
+                mainAddBtn.style.display = 'flex';
+                mainAddBtn.querySelector('span').textContent = text;
+                mainAddBtn.dataset.modalType = type; // Store the type
+            }
+
+            /**
+             * Loads data for the specified page
+             */
+            function loadPageData(pageId) {
+                switch (pageId) {
+                    case 'page-dashboard':
+                        loadDashboardStats();
+                        break;
+                    case 'page-appointments':
+                        loadAppointments();
+                        break;
+                    case 'page-patients':
+                        loadPatients();
+                        break;
+                    case 'page-doctors':
+                        loadDoctors();
+                        break;
+                    case 'page-departments':
+                        loadDepartments();
+                        break;
+                    case 'page-schedule':
+                        // The schedule page needs doctor data for its dropdown
+                        if (allDoctors.length === 0) {
+                            loadDoctors().then(populateDoctorDropdowns);
+                        } else {
+                            populateDoctorDropdowns();
+                        }
+                        break;
+                }
+            }
+            
+            /**
+             * Populates doctor dropdowns once doctor data is loaded
+             */
+            function populateDoctorDropdowns() {
+                 const doctorOptions = allDoctors
+                    .map(doc => `<option value="${doc.DoctorName}">${doc.DoctorName}</option>`)
+                    .join('');
+
+                if (scheduleDoctorSelect) {
+                    scheduleDoctorSelect.innerHTML = '<option value="all">All Doctors</option>' + doctorOptions;
+                }
+            }
+
+
+            // --- 2. Live Date & Time Update ---
+            function updateDateTime() {
+                const now = new Date();
+                const options = {
+                    year: 'numeric', month: 'short', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit', hour12: true
+                };
+                const formattedDateTime = now.toLocaleString('en-US', options)
+                                             .replace(',', '')
+                                             .replace(/(\d{2}:\d{2}) (\wM)/, '$1 $2');
+                
+                const dateEl = document.getElementById('current-datetime');
+                if (dateEl) dateEl.textContent = formattedDateTime;
+            }
+            updateDateTime();
+            setInterval(updateDateTime, 30000);
+
+            // --- 3. Mobile Sidebar Toggle ---
+            if (sidebar && sidebarToggle) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('open');
+                });
+            }
+
+            // --- 4. Modal Logic (Main "Add" button + Quick Action buttons) ---
+            const allOpenModalBtns = document.querySelectorAll('[data-modal-type]');
+            
+            const openModal = (type) => {
+                currentModalType = type; // Set the global state
+                updateModalContent(type);
+                if(modal) modal.classList.add('open');
+            }
+            const closeModal = () => {
+                if(modal) modal.classList.remove('open');
+            }
+
+            // This needs to be a "delegated" event listener on the body
+            // because the quick action buttons are on a page that isn't active at load
+            document.body.addEventListener('click', function(e) {
+                const btn = e.target.closest('[data-modal-type]');
+                if (btn) {
+                    const type = btn.dataset.modalType;
+                    openModal(type);
+                }
+            });
+
+            if (modal && modalCloseBtn && modalCancelBtn) {
+                modalCloseBtn.addEventListener('click', closeModal);
+                modalCancelBtn.addEventListener('click', closeModal);
+                modalSaveBtn.addEventListener('click', saveDataFromModal);
+                
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) closeModal();
+                });
+            }
+
+            /**
+             * Changes the modal's title and form fields based on type
+             */
+            function updateModalContent(type) {
+                if (!modalTitle || !modalFormContent) return;
+
+                let title = '';
+                let formHtml = '';
+
+                // Get latest doctor/patient options
+                const doctorOptions = allDoctors
+                    .map(doc => `<option value="${doc.DoctorName}">${doc.DoctorName}</option>`)
+                    .join('');
+                
+                const patientOptions = allPatients
+                    .map(p => `<option value="${p.PatientName}">${p.PatientName}</option>`)
+                    .join('');
+
+                switch (type) {
+                    case 'appointment':
+                        title = 'New Appointment';
+                        formHtml = `
+                            <div class="form-group full-width">
+                                <label for="modal-patient-name">Patient Name</label>
+                                <input list="patient-list" id="modal-patient-name" placeholder="Select or type patient name">
+                                <datalist id="patient-list">
+                                    ${patientOptions}
+                                </datalist>
+                            </div>
+                            <div class="form-group">
+                                <label for="modal-doctor-name">Doctor</label>
+                                <select id="modal-doctor-name">
+                                    <option value="">Select a doctor</option>
+                                    ${doctorOptions}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="modal-treatment">Treatment</label>
+                                <input type="text" id="modal-treatment" placeholder="e.g., Dental Checkup">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal-appt-date">Date</label>
+                                <input type="date" id="modal-appt-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal-appt-time">Time</label>
+                                <input type="time" id="modal-appt-time">
+                            </div>
+                        `;
+                        break;
+                    case 'patient':
+                        title = 'Add New Patient';
+                        formHtml = `
+                            <div class="form-group full-width">
+                                <label for="modal-patient-name">Full Name</label>
+                                <input type="text" id="modal-patient-name" placeholder="Enter patient's full name">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="modal-patient-email">Email</label>
+                                <input type="email" id="modal-patient-email" placeholder="patient@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal-patient-status">Status</label>
+                                <select id="modal-patient-status">
+                                    <option value="New">New</option>
+                                    <option value="Active">Active</option>
+                                </select>
+                            </div>
+                        `;
+                        break;
+                    case 'doctor':
+                        title = 'Add New Doctor';
+                        formHtml = `
+                            <div class="form-group full-width">
+                                <label for="modal-doctor-name">Doctor Name</label>
+                                <input type="text" id="modal-doctor-name" placeholder="e.g., Dr. Emily White">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal-doctor-specialty">Specialty</label>
+                                <input type="text" id="modal-doctor-specialty" placeholder="e.g., Dentist">
+                            </div>
+                            <div class="form-group">
+                                <label for="modal-doctor-status">Status</label>
+                                <select id="modal-doctor-status">
+                                    <option value="Online">Online</option>
+                                    <option value="Offline">Offline</option>
+                                </select>
+                            </div>
+                        `;
+                        break;
+                    case 'department':
+                        title = 'Add New Department';
+                        formHtml = `
+                            <div class="form-group full-width">
+                                <label for="modal-dept-name">Department Name</label>
+                                <input type="text" id="modal-dept-name" placeholder="e.g., Cardiology">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="modal-dept-desc">Description</label>
+                                <textarea id="modal-dept-desc" placeholder="A short description..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="modal-dept-icon">Icon (Font Awesome)</label>
+                                <input type="text" id="modal-dept-icon" placeholder="e.g., fa-heart-pulse">
+                            </div>
+                        `;
+                        break;
+                }
+
+                modalTitle.textContent = title;
+                modalFormContent.innerHTML = formHtml;
+            }
+
+            // --- 5. Settings Page Tab Logic ---
+            const settingsNavItems = document.querySelectorAll('.settings-nav-item');
+            const settingsContents = document.querySelectorAll('.settings-content');
+            settingsNavItems.forEach(item => {
+                item.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const targetSettingId = this.dataset.setting;
+                    const targetSetting = document.getElementById(targetSettingId);
+
+                    if (targetSetting) {
+                        settingsNavItems.forEach(nav => nav.classList.remove('active'));
+                        settingsContents.forEach(sec => sec.classList.remove('active'));
+                        this.classList.add('active');
+                        targetSetting.classList.add('active');
+                    }
+                });
+            });
+
+            // --- 6. Dark Mode Toggle ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+            
+            // Check for saved theme
+            if (localStorage.getItem('theme') === 'dark') {
+                body.classList.add('dark-mode');
+            }
+
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    body.classList.toggle('dark-mode');
+                    // Save theme preference
+                    if (body.classList.contains('dark-mode')) {
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            }
+
+            // --- 7. NEW: Data Loading & Saving Functions ---
+
+            /**
+             * Fetches data from Google Sheets
+             */
+            async function fetchData(sheetName) {
+                if (GOOGLE_SCRIPT_URL === 'PASTE_YOUR_URL_HERE') {
+                    console.error("Google Script URL is not set. Please paste your URL from Apps Script.");
+                    return []; 
+                }
+                
+                showLoading();
+                try {
+                    // Added a timestamp to prevent caching
+                    const url = `${GOOGLE_SCRIPT_URL}?sheet=${sheetName}&v=${new Date().getTime()}`;
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        return result.data;
+                    } else {
+                        console.error("Error fetching data:", result.error);
+                        return [];
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    return [];
+                } finally {
+                    hideLoading();
+                }
+            }
+
+            /**
+             * Posts data to Google Sheets
+             */
+            async function saveData(sheetName, dataObject) {
+                 if (GOOGLE_SCRIPT_URL === 'PASTE_YOUR_URL_HERE') {
+                    console.error("Google Script URL is not set. Please paste your URL from Apps Script.");
+                    return false;
+                }
+                
+                showLoading();
+                try {
+                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', // Apps Script web apps often require 'no-cors' for simple POSTs
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sheet: sheetName, data: dataObject })
+                    });
+                    
+                    // 'no-cors' means we can't read the response. We optimistically assume success.
+                    // A more robust solution involves a different Apps Script return format.
+                    return true;
+                    
+                } catch (error) {
+                    console.error("Save error:", error);
+                    return false;
+                } finally {
+                    hideLoading();
+                }
+            }
+            
+            /**
+             * Central function to handle saving data from the modal
+             */
+            async function saveDataFromModal() {
+                let sheetName = '';
+                let dataObject = {};
+                let isValid = false;
+
+                switch (currentModalType) {
+                    case 'appointment':
+                        sheetName = 'Appointments';
+                        const patientName = document.getElementById('modal-patient-name').value;
+                        const doctorName = document.getElementById('modal-doctor-name').value;
+                        const date = document.getElementById('modal-appt-date').value;
+                        
+                        if (patientName && doctorName && date) {
+                            dataObject = {
+                                "ID": "AP-" + Math.floor(1000 + Math.random() * 9000),
+                                "PatientName": patientName,
+                                "DoctorName": doctorName,
+                                "Treatment": document.getElementById('modal-treatment').value,
+                                "Date": date,
+                                "Time": document.getElementById('modal-appt-time').value,
+                                "Status": "Pending"
+                            };
+                            isValid = true;
+                        }
+                        break;
+                    
+                    case 'patient':
+                        sheetName = 'Patients';
+                        const pName = document.getElementById('modal-patient-name').value;
+                        if (pName) {
+                            dataObject = {
+                                "ID": "P-" + Math.floor(1000 + Math.random() * 9000),
+                                "PatientName": pName,
+                                "Email": document.getElementById('modal-patient-email').value,
+                                "Status": document.getElementById('modal-patient-status').value,
+                                "LastVisit": new Date().toISOString(), // Set last visit to now
+                                "TotalAppts": 0
+                            };
+                            isValid = true;
+                        }
+                        break;
+                    
+                    case 'doctor':
+                        sheetName = 'Doctors';
+                        const dName = document.getElementById('modal-doctor-name').value;
+                        if (dName) {
+                            dataObject = {
+                                "ID": "D-" + Math.floor(100 + Math.random() * 900),
+                                "DoctorName": dName,
+                                "Specialty": document.getElementById('modal-doctor-specialty').value,
+                                "Status": document.getElementById('modal-doctor-status').value
+                            };
+                            isValid = true;
+                        }
+                        break;
+                    
+                    case 'department':
+                        sheetName = 'Departments';
+                        const deptName = document.getElementById('modal-dept-name').value;
+                        if (deptName) {
+                            dataObject = {
+                                "ID": "DEPT-" + Math.floor(100 + Math.random() * 900),
+                                "Name": deptName,
+                                "Description": document.getElementById('modal-dept-desc').value,
+                                "Icon": document.getElementById('modal-dept-icon').value || 'fa-building'
+                            };
+                            isValid = true;
+                        }
+                        break;
+                }
+
+                if (!isValid) {
+                    alert("Please fill out all required fields.");
+                    return;
+                }
+
+                const success = await saveData(sheetName, dataObject);
+
+                if (success) {
+                    closeModal();
+                    // Refresh the data on the current page
+                    const activePageId = document.querySelector('.page-content.active').id;
+                    loadPageData(activePageId);
+                    
+                    // Also refresh dashboard stats in the background
+                    loadDashboardStats();
+                } else {
+                    alert("Failed to save data. Check console for errors.");
+                }
+            }
+
+            /**
+             * Loads and populates the Appointments table
+             */
+            async function loadAppointments() {
+                const data = await fetchData('Appointments');
+                allAppointments = data; // cache
+                if (!appointmentsTBody) return;
+                
+                appointmentsTBody.innerHTML = ''; // Clear existing
+                data.forEach(row => {
+                    const statusClass = `status-${row.Status ? row.Status.toLowerCase() : 'pending'}`;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><input type="checkbox"></td>
+                        <td>${row.ID || '#'}</td>
+                        <td>${row.PatientName || ''}</td>
+                        <td>${row.DoctorName || ''}</td>
+                        <td>${row.Date ? new Date(row.Date).toLocaleDateString() : ''}</td>
+                        <td>${row.Time || ''}</td>
+                        <td>${row.Treatment || ''}</td>
+                        <td><span class="status-pill ${statusClass}">${row.Status || 'Pending'}</span></td>
+                        <td class="action-icons">
+                            <i class="fa-solid fa-eye"></i>
+                            <i class="fa-solid fa-pencil"></i>
+                            <i class="fa-solid fa-trash-can"></i>
+                        </td>
+                    `;
+                    appointmentsTBody.appendChild(tr);
+                });
+            }
+
+            /**
+             * Loads and populates the Patients table
+             */
+            async function loadPatients() {
+                const data = await fetchData('Patients');
+                allPatients = data; // Cache data
+                if (!patientsTBody) return;
+
+                patientsTBody.innerHTML = ''; // Clear existing
+                const avatarColors = ['pa-1', 'pa-2', 'pa-3', 'pa-4'];
+                data.forEach((row, index) => {
+                    const statusClass = `status-${row.Status ? row.Status.toLowerCase() : 'new'}`;
+                    const initials = row.PatientName ? row.PatientName.split(' ').map(n => n[0]).join('') : '??';
+                    const avatarClass = avatarColors[index % avatarColors.length];
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><input type="checkbox"></td>
+                        <td>
+                            <div class="patient-cell">
+                                <div class="patient-avatar ${avatarClass}">${initials}</div>
+                                <div class="patient-info">
+                                    <span class="patient-name">${row.PatientName || ''}</span>
+                                    <span class="patient-email">${row.Email || ''}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${row.ID || '#'}</td>
+                        <td>${row.LastVisit ? new Date(row.LastVisit).toLocaleDateString() : 'N/A'}</td>
+                        <td>${row.TotalAppts || 0}</td>
+                        <td><span class="status-pill ${statusClass}">${row.Status || 'New'}</span></td>
+                        <td class="action-icons">
+                            <i class="fa-solid fa-eye"></i>
+                            <i class="fa-solid fa-pencil"></i>
+                            <i class="fa-solid fa-trash-can"></i>
+                        </td>
+                    `;
+                    patientsTBody.appendChild(tr);
+                });
+            }
+            
+            /**
+             * Loads and populates the Doctors grid
+             */
+            async function loadDoctors() {
+                const data = await fetchData('Doctors');
+                allDoctors = data; // Cache data for modal dropdown
+                if (!doctorsGrid) return;
+
+                doctorsGrid.innerHTML = ''; // Clear existing
+                const avatarColors = ['var(--color-card-icon-1)', 'var(--color-card-icon-4)', 'var(--color-card-icon-3)', 'var(--color-card-icon-2)'];
+                const avatarTextColors = ['var(--color-card-icon-1-text)', 'var(--color-card-icon-4-text)', 'var(--color-card-icon-3-text)', 'var(--color-card-icon-2-text)'];
+                
+                data.forEach((row, index) => {
+                    const initials = row.DoctorName ? row.DoctorName.replace('Dr. ', '').split(' ').map(n => n[0]).join('') : '??';
+                    const avatarBg = avatarColors[index % avatarColors.length];
+                    const avatarText = avatarTextColors[index % avatarTextColors.length];
+                    
+                    const card = document.createElement('div');
+                    card.className = 'doctor-card';
+                    card.innerHTML = `
+                        <div class="doctor-avatar-wrapper">
+                            <div class="doctor-avatar" style="background-color: ${avatarBg}; color: ${avatarText};">${initials}</div>
+                            ${row.Status === 'Online' ? '<div class="online-status"></div>' : ''}
+                        </div>
+                        <h4>${row.DoctorName || ''}</h4>
+                        <p class="doctor-specialty">${row.Specialty || ''}</p>
+                        <div class="doctor-card-actions">
+                            <button class="btn btn-primary"><i class="fa-solid fa-calendar-days"></i> Schedule</button>
+                            <button class="btn btn-secondary"><i class="fa-solid fa-user"></i> Profile</button>
+                        </div>
+                    `;
+                    doctorsGrid.appendChild(card);
+                });
+                
+                // After loading doctors, populate any dropdowns that need them
+                populateDoctorDropdowns();
+                
+                return data; // Return data for chaining
+            }
+            
+            /**
+             * Loads and populates the Departments grid
+             */
+            async function loadDepartments() {
+                const data = await fetchData('Departments');
+                if (!departmentsGrid) return;
+                
+                departmentsGrid.innerHTML = ''; // Clear
+                const deptColors = ['d-1', 'd-2', 'd-3', 'd-4', 'd-5', 'd-6'];
+
+                data.forEach((row, index) => {
+                    const colorClass = deptColors[index % deptColors.length];
+                    const iconClass = row.Icon || 'fa-building';
+
+                    const card = document.createElement('div');
+                    card.className = `dept-card ${colorClass}`;
+                    card.innerHTML = `
+                        <div class="dept-icon"><i class="fa-solid ${iconClass}"></i></div>
+                        <h4>${row.Name || ''}</h4>
+                        <p>${row.Description || 'No description.'}</p>
+                        <a href="#" class="dept-title-link">View Details <i class="fa-solid fa-arrow-right"></i></a>
+                    `;
+                    departmentsGrid.appendChild(card);
+                });
+            }
+            
+            /**
+             * Loads all data for dashboard stats
+             */
+            async function loadDashboardStats() {
+                // This is a more advanced pattern: load all data in parallel
+                showLoading();
+                const [apptData, patientData, doctorData] = await Promise.all([
+                    fetchData('Appointments'),
+                    fetchData('Patients'),
+                    fetchData('Doctors')
+                ]);
+                hideLoading(); // Hide after all are done
+                
+                // Update caches
+                allAppointments = apptData;
+                allPatients = patientData;
+                allDoctors = doctorData;
+                
+                // Update stats
+                if (statAppointments) {
+                    const today = new Date().setHours(0,0,0,0);
+                    const todayAppts = apptData.filter(appt => new Date(appt.Date).setHours(0,0,0,0) === today).length;
+                    statAppointments.textContent = todayAppts;
+S                }
+                if (statPatients) {
+                    statPatients.textContent = patientData.length;
+                }
+                if (statDoctors) {
+                    const onlineDoctors = doctorData.filter(doc => doc.Status === 'Online').length;
+                    statDoctors.textContent = onlineDoctors;
+                }
+                
+                // Now that we have doctors, populate dropdowns
+                populateDoctorDropdowns();
+            }
+            
+            // --- Initial Data Load ---
+            // Load data for the default active page (Dashboard)
+            loadDashboardStats();
+            // Set the correct initial "Add" button
+            updateMainAddButton('page-dashboard');
+
+        });
+    </script>
+</body>
+</html>
+
